@@ -6,29 +6,14 @@ EAPI=7
 USE_RUBY="ruby25 ruby26 ruby27"
 PYTHON_COMPAT=( python{2_7,3_6,3_7,3_8,3_9} )
 
-inherit bash-completion-r1 ruby-single python-any-r1
+inherit git-r3 bash-completion-r1 ruby-single python-any-r1
 
 DESCRIPTION="Zyn-Fusion User Interface"
 HOMEPAGE="https://github.com/mruby-zest/mruby-zest-build"
+EGIT_REPO_URI="https://github.com/mruby-zest/mruby-zest-build"
+EGIT_COMMIT="${PV}"
 
 SUBMODULES=(
-	"4f57a1ef9f968e9d5eef53667c7960a2e98c9750 deps/mruby-complex https://github.com/pbosetti/mruby-complex"
-	"334c040a2e2c4c2689f8c3440168011f64d57ada deps/mruby-dir-glob https://github.com/gromnitsky/mruby-dir-glob"
-	"6849202f885516b381406e799dcdb430065e19cf deps/mruby-glew https://github.com/IceDragon200/mruby-glew"
-	"0eeee012fd4bbd6544dd34f17ce2b476ad71d86b deps/mruby-glfw3 https://github.com/IceDragon200/mruby-glfw3"
-	"1c4428880b2f0f0fcd81ea2debc5f4459a7ed53c deps/mruby-io https://github.com/iij/mruby-io"
-	"d7d4e1ce434131babb5fd6026201011f5b0b50ea deps/mruby-nanovg https://github.com/mruby-zest/mruby-nanovg"
-	"cd13fb15fd6b813fc6c9bc2f17db20257f71bb0c deps/mruby-regexp-pcre https://github.com/iij/mruby-regexp-pcre"
-	"68334311ac7386eef84f3034a256e7135a87625d deps/mruby-set https://github.com/yui-knk/mruby-set"
-	"263d70351a4f75a875f2a35ab9a9128d1ef5da90 deps/mruby-sleep https://github.com/matsumoto-r/mruby-sleep"
-	"b83cf926525e7cea8d2483da2a75852b8c7b6d28 deps/nanovg https://github.com/memononen/nanovg"
-	"d87062625ed652df9455bd6f60ea89c53515c43a deps/pugl https://github.com/mruby-zest/pugl"
-	"70307782622c668a325992f6887f354ca30d5e14 deps/rtosc https://github.com/fundamental/rtosc"
-	"e5b61d34f65cabfbe88f3f1709a1f9cff86585de mruby https://github.com/mruby/mruby"
-	"a3e687124b5afe51cdc4d8d36cbff7204e81a1b4 src/mruby-qml-parse https://github.com/mruby-zest/mruby-qml-parse"
-	"77f782643c78a9cfe48e49f027d9978fb5e27d77 src/mruby-qml-spawn https://github.com/mruby-zest/mruby-qml-spawn"
-	"8352b7ae4a0efba111f72572d993efb892a27761 src/mruby-zest https://github.com/mruby-zest/mruby-zest"
-	"67b0b5c85e0072ea0bee1129a1ec8cef1328faaa src/osc-bridge https://github.com/mruby-zest/osc-bridge"
 	"2033837203c8a141b1f9d23bb781fe0cbaefbd24 mruby/build/mrbgems/mgem-list https://github.com/mruby/mgem-list"
 	"89dceefa1250fb1ae868d4cb52498e9e24293cd1 mruby/build/mrbgems/mruby-dir https://github.com/iij/mruby-dir"
 	"383a9c79e191d524a9a2b4107cc5043ecbf6190b mruby/build/mrbgems/mruby-pack https://github.com/iij/mruby-pack"
@@ -36,8 +21,6 @@ SUBMODULES=(
 	"d196a1e529d227511cf19d516a46f62866619008 mruby/build/mrbgems/mruby-file-stat https://github.com/ksss/mruby-file-stat"
 	"95da206a5764f4e80146979b8e35bd7a9afd6850 mruby/build/mrbgems/mruby-process https://github.com/iij/mruby-process"
 )
-
-SRC_URI="https://github.com/mruby-zest/mruby-zest-build/archive/${PV}.tar.gz -> ${P}.tar.gz"
 for i in "${SUBMODULES[@]}"; do
 	set -- $i
 	SRC_URI+=" $3/archive/$1.tar.gz -> ${3/*\//}-$1.tar.gz"
@@ -53,15 +36,17 @@ DEPEND="dev-libs/libuv
 	x11-libs/libxcb
 	virtual/opengl"
 RDEPEND="${DEPEND}"
-BDEPEND="${RUBY_DEPS}
-${PYTHON_DEPS}"
-
-S="${WORKDIR}/mruby-zest-build-$PV"
+BDEPEND="${PYTHON_DEPS}"
 
 PATCHES=(
 "${FILESDIR}/zyn-fusion-gcc10.patch"
 "${FILESDIR}/zyn-fusion-qml-path.patch"
 )
+
+src_unpack() {
+  git-r3_src_unpack
+  default
+}
 
 src_prepare() {
 	# Unbundle libuv: makefile and rake file
